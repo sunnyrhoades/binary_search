@@ -17,7 +17,28 @@ def find_smallest_positive(xs):
     >>> find_smallest_positive([-3, -2, -1]) is None
     True
     '''
+    left = 0
+    right = len(xs)-1
+    def foo(left, right):
+        mid = (left+right)//2
+        if xs[mid]==0:
+            return mid+1
+        if right==left:
+            if xs[mid] > 0:
+                return mid
+            else:
+                return None
+        if xs[mid] > 0:
+            return foo(left, mid-1)
+        if xs[mid] < 0:
+            return foo(mid+1, right)
 
+    if len(xs)==0:
+        return None
+    if xs[0] > 0:
+        return 0
+    else:
+        return foo(left, right)
 
 def count_repeats(xs, x):
     '''
@@ -39,8 +60,47 @@ def count_repeats(xs, x):
     >>> count_repeats([3, 2, 1], 4)
     0
     '''
+    left = 0
+    right = len(xs)-1
 
+    def start(left, right):
+        mid = (left+right)//2
+        if xs[mid]==x:
+            if mid==0 or xs[mid-1] > x:
+                return mid
+            else:
+                return start(left, mid-1)
+        if right==left:
+            return None
+        if x < xs[mid]:
+            return start(mid+1, right)
+        if x > xs[mid]:
+            return start(left, mid-1)
+    
+    def end(left, right):
+        mid = (left+right)//2
+        if xs[mid]==x:
+            if mid == len(xs)-1 or x > xs[mid+1]:
+                return mid
+            else:
+                return end(mid+1, right)
+        if right==left:
+            return None
+        if x < xs[mid]:
+            return end(mid+1, right)
+        if x > xs[mid]:
+            return end(left, mid-1)
+    
+    if len(xs)==0:
+        return 0
 
+    a = start(left, right)
+    b = end(left, right)
+    if a ==  None or b ==  None:
+        return 0
+    else:
+        return b-a+1
+    
 def argmin(f, lo, hi, epsilon=1e-3):
     '''
     Assumes that f is an input function that takes a float as input and returns a float with a unique global minimum,
@@ -61,4 +121,15 @@ def argmin(f, lo, hi, epsilon=1e-3):
     >>> argmin(lambda x: (x-5)**2, -20, 0)
     -0.00016935087808430278
     '''
-
+    left = lo
+    right = hi
+    def foo(left, right):
+        m1 = left+(right-left)/6
+        m2 = left+(right-left)/3
+        if right-left < epsilon:
+            return right
+        if f(m2) < f(m1):
+            return foo(m1, right)
+        if f(m2) > f(m1):
+            return foo(left, m2)
+    return foo(left, right)
